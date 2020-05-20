@@ -1,35 +1,34 @@
 swagger: '2.0'
 info:
   description: Initial API for FHDA
-  version: "1.1.1"
+  version: "1.1.3"
   title: FHDA API
 
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 
-# tags are used for organizing operations
-tags:
-- name: admins
-  description: Secured Admin-only calls
-
 paths:
-  /course_by_quarter:
+#################COURSE OPERATIONS###########################
+  /courses:
     get:
-      tags:
-      - admins
-      summary: get course info
-      operationId: getCourseByQuarter
+      summary: get course info by passing parameters
+      operationId: getCourse
       description: |
         Search for course by quarter
       produces:
       - application/json
       parameters:
-      - in: query
-        name: quarter
-        description: the quarter for searching
-        type: string
-
+        - in: query
+          name: quarter
+          description: the quarter for searching
+          type: string
+          required: true
+        - in: query
+          name: crn
+          description: the crn for searching
+          type: string
+          required: false
       responses:
         200:
           description: search results matching criteria
@@ -39,67 +38,11 @@ paths:
               $ref: '#/definitions/CourseAcctD001A'
         400:
           description: bad input parameter
+        404:
+          description: cannot find the course with given parameter
           
-  /course_by_quarter_and_dept:
-    get:
-      tags:
-      - admins
-      summary: get course info
-      operationId: getCourseByQuarterAndDept
-      description: |
-        Search for course by inputing both quarter and department name
-      produces:
-      - application/json
-      parameters:
-      - in: query
-        name: quarter
-        description: the quarter for searching
-        type: string
-      - in: query
-        name: dept
-        description: the department name for searching
-        type: string
-
-      responses:
-        200:
-          description: search results matching criteria
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/CourseAcctD001A'
-        400:
-          description: bad input parameter
-          
-  /get_dept:
-    get:
-      tags:
-      - admins
-      summary: get deptartment info
-      operationId: getDept
-      description: |
-        Search for department given input department name
-      produces:
-      - application/json
-      parameters:
-      - in: query
-        name: deptName
-        description: the department name for searching
-        type: string
-      responses:
-        200:
-          description: search results matching criteria
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/DepartmentAcct'
-        400:
-          description: bad input parameter
-          
-  /add_course:
-    post:
-      tags:
-      - admins
-      summary: adds a course
+    put:
+      summary: adds a new course
       operationId: addCourse
       description: Adds a course to the system
       parameters:
@@ -116,7 +59,209 @@ paths:
         409:
           description: an existing course already exists
           
-###############################DEFINITIONS####################################
+    post:
+      summary: edit a course
+      operationId: editCourse
+      description: Edits a course in the system
+      parameters:
+      - in: query
+        name: crn
+        description: using crn for searching
+        type: string
+        required: true
+      responses:
+        201:
+          description: course editted
+        400:
+          description: invalid input, object invalid
+          
+    delete:
+      summary: deletes a course
+      operationId: deleteCourse
+      description: Deletes a course from the system
+      parameters:
+      - in: query
+        name: crn
+        description: using crn for searching
+        type: string
+        required: true
+      responses:
+        200:
+          description: course deleted
+        400:
+          description: invalid input, object invalid
+        404:
+          description: requested course not found
+          
+    
+          
+#################DEPTARTMENT OPERATIONS###########################
+  /departments:
+    get:
+      summary: get deptartment info
+      operationId: getDept
+      description: |
+        Search for department given input department name
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: deptName
+        description: the department name for searching
+        type: string
+        required: true
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/DepartmentAcct'
+        400:
+          description: bad input parameter
+        404:
+          description: cannot find the department with given parameter
+          
+    put:
+      summary: adds a department
+      operationId: addDept
+      description: Adds a department to the system
+      parameters:
+      - in: body
+        name: department
+        description: departmentr object to add
+        schema:
+          $ref: '#/definitions/DepartmentAcct'
+      responses:
+        201:
+          description: department created
+        400:
+          description: invalid input, object invalid
+        409:
+          description: an existing department already exists
+          
+    post:
+      summary: edit a department
+      operationId: editDepartment
+      description: Edits a department in the system
+      parameters:
+      - in: query
+        name: departmentName
+        description: using department name for searching
+        type: string
+        required: true
+      responses:
+        201:
+          description: department editted
+        400:
+          description: invalid input, object invalid
+          
+    delete:
+      summary: deletes a department
+      operationId: deleteDepartment
+      description: Deletes a department from the system
+      parameters:
+      - in: query
+        name: departmentName
+        description: using department name for searching
+        type: string
+        required: true
+      responses:
+        200:
+          description: department deleted
+        400:
+          description: invalid input, object invalid
+        404:
+          description: requested department not found
+          
+
+#################Instructor OPERATIONS###########################
+  /instructors:
+    get:
+      summary: get instructor info
+      operationId: getInstructor
+      description: |
+        Search for an instructor using either instructor name or course crn
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: instructorName
+        description: using instructor name for searching
+        type: string
+        required: false
+      - in: query
+        name: crn
+        description: search for the instructor of a specific course
+        type: string
+        required: false
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/InstructorFarshod'
+        400:
+          description: bad input parameter
+        404:
+          description: cannot find the instructor with given parameter
+          
+    put:
+      summary: adds an instructor
+      operationId: addInstructor
+      description: Adds an instructor to the system
+      parameters:
+      - in: body
+        name: instructor
+        description: instructor object to add
+        schema:
+          $ref: '#/definitions/InstructorFarshod'
+      responses:
+        201:
+          description: instructor added
+        400:
+          description: invalid input, object invalid
+        409:
+          description: an existing instructor already exists
+          
+    post:
+      summary: edit an instructor
+      operationId: editInstructor
+      description: Edits an instructor in the system
+      parameters:
+      - in: query
+        name: instructorName
+        description: using instructor name for searching
+        type: string
+        required: true
+      responses:
+        201:
+          description: instructor editted
+        400:
+          description: invalid input, object invalid
+          
+    delete:
+      summary: deletes an instructor
+      operationId: deleteInstructor
+      description: Deletes an instructor from the system
+      parameters:
+      - in: query
+        name: instructorName
+        description: using instructor name for searching
+        type: string
+        required: true
+      responses:
+        200:
+          description: instructor deleted
+        400:
+          description: invalid input, object invalid
+        404:
+          description: requested instructor not found
+
+
+          
+###############################DEFINITIONS###############################
 definitions:
   CourseAcctD001A:
     type: object
@@ -137,6 +282,9 @@ definitions:
       courseNum:
         type: string
         example: D001A
+      days:
+        type: string
+        example: TR
       startDate:
         type: string
         format: date
@@ -201,6 +349,9 @@ definitions:
       courseNum:
         type: string
         example: D022A
+      days:
+        type: string
+        example: MW
       startDate:
         type: string
         format: date
@@ -277,6 +428,8 @@ definitions:
       endTime:
         type: string
         example: 12:15 pm
+      lab:
+        $ref: '#/definitions/LabPhysicsD004A'
       capacity:
         type: integer
         example: 40
@@ -377,6 +530,6 @@ definitions:
         
 # Added by API Auto Mocking Plugin
 host: virtserver.swaggerhub.com
-basePath: /yifeili98/FHDA_Incubator/1.1.1
+basePath: /yifeili98/FHDA_Incubator/1.1.3
 schemes:
  - https
